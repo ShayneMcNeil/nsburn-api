@@ -22,7 +22,7 @@ async function scrapeWebsite() {
         const restrictions = [];
 
         rows.each((index, row) => {
-            let county = $(row).find("th").text();
+            let county = $(row).find("th").text().replace(" County", "");
             let colorStatus = $(row).find("img").attr("alt").split(" ");
             let restrictionLevel = $(row).find("p").text();
 
