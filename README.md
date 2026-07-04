@@ -4,6 +4,9 @@ A lightweight API proxy and scraper that tracks daily open fires and burn restri
 
 The project scrapes data daily from the [Nova Scotia BurnSafe map](https://novascotia.ca/burnsafe/) and exposes it as a clean JSON endpoint deployed on **Render**.
 
+> [!IMPORTANT]
+> **Scraping Disclaimer**: This project is configured to query the official government website on a controlled, daily schedule via GitHub Actions. Please do not modify the code to run scraping processes on every API request. Over-scraping public government resources is unnecessary, wastes public bandwidth, and risks getting your server's IP address blacklisted. The existing workflow handles scraping requirements safely and efficiently.
+
 ---
 
 ## How It Works
