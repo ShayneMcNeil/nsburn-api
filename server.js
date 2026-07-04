@@ -4,7 +4,7 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-const GITHUB_USERNAME = "shaynemcneil"; 
+const GITHUB_USERNAME = "ShayneMcNeil"; 
 const REPO_NAME = "nsburn-api";
 const BRANCH = "main";
 
