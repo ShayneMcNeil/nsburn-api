@@ -27,6 +27,9 @@ graph TD
 
 ## API Endpoints
 
+### `GET /`
+Returns a responsive dashboard showing the operational state, the last scraped date/time, and basic information on how the API works, including a link to the GitHub repository.
+
 ### `GET /api/restrictions`
 Fetches the current burn restrictions for all counties in Nova Scotia.
 
@@ -68,7 +71,7 @@ Start the local Express server:
 ```bash
 node server.js
 ```
-The server will be running on `http://localhost:3000`. You can test it by going to `http://localhost:3000/api/restrictions` in your browser.
+The server will be running on `http://localhost:3000`. You can test it by going to `http://localhost:3000/` in your browser.
 
 ---
 
@@ -86,3 +89,32 @@ Pass your deployed API URL as an argument to the CLI:
 ```bash
 node cli.js https://your-render-app.onrender.com/api/restrictions
 ```
+
+---
+
+## Testing
+
+An integration test suite ([test.js](test.js)) is included to verify that the scraper and API endpoint function correctly.
+
+### Run tests locally:
+```bash
+npm test
+```
+This command will start the local server in the background, fetch the restrictions endpoint, read the local `data.json`, and assert that the structure is valid.
+
+### Run tests against your deployed Render endpoint:
+You can pass a `RENDER_URL` environment variable to test the live deployed API:
+* **PowerShell**:
+  ```powershell
+  $env:RENDER_URL="https://your-render-app.onrender.com"; npm test
+  ```
+* **Bash**:
+  ```bash
+  RENDER_URL="https://your-render-app.onrender.com" npm test
+  ```
+
+### CI/CD Workflow
+The project runs a GitHub Actions workflow (`CI Test Suite` inside [.github/workflows/test.yml](.github/workflows/test.yml)) on every push and pull request to `main`. This CI/CD suite automatically:
+1. Installs all project dependencies.
+2. Runs the scraper to ensure the target website's HTML structure hasn't changed.
+3. Launches the server and runs integration tests to verify endpoint responsiveness and schema accuracy.
