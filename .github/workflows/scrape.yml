@@ -2,7 +2,9 @@ name: Daily Scraper (March 15 - Oct 15)
 
 on:
   schedule:
-    # Runs at 17:15 UTC (2:15 PM ADT) every day from March to October
+    # Runs at 9:00 AM ADT (12:00 UTC) every day from March to October
+    - cron: '0 12 * 3-10 *'
+    # Runs at 2:15 PM ADT (17:15 UTC) every day from March to October
     - cron: '15 17 * 3-10 *'
   workflow_dispatch: # Allows manual testing
 

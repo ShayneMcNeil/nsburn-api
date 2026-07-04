@@ -22,7 +22,7 @@ graph TD
     F[User / Client] -->|GET /api/restrictions| D
 ```
 
-1. **Daily Scrape**: A GitHub Action runs every day (from March 15 to October 15) at 2:15 PM Atlantic Time (17:15 UTC) to execute [scraper.js](scraper.js). This runs 15 minutes after the government updates the BurnSafe website (normally at 2:00 PM Atlantic) to allow for any delays on their end. It parses the Nova Scotia BurnSafe table and updates [data.json](data.json) in this repository.
+1. **Daily Scrape**: A GitHub Action runs twice every day (from March 15 to October 15) at **9:00 AM Atlantic Time (12:00 UTC)** and **2:15 PM Atlantic Time (17:15 UTC)** to execute [scraper.js](scraper.js). The afternoon run occurs 15 minutes after the government's scheduled daily update (normally at 2:00 PM Atlantic) to allow for any delays on their end, while the morning run captures any early updates. It parses the Nova Scotia BurnSafe table and updates [data.json](data.json) in this repository.
 2. **Dynamic Serving**: The API is hosted on Render ([server.js](server.js)). When someone calls the API, the server:
    - Resolves the latest commit SHA from GitHub.
    - Fetches the file contents dynamically using the unique commit SHA URL to bypass GitHub's aggressive 5-minute CDN caching.
