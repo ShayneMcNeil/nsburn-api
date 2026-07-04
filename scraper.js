@@ -42,7 +42,7 @@ async function scrapeWebsite() {
             "data": restrictions
         }
 
-        fs.writeFileSync('data.json', JSON.stringify(result, null, 2));
+        fs.writeFileSync('data.json', JSON.stringify(scrapeReport, null, 2));
 
         console.log("Scrape successful!");
     } catch(error) {
