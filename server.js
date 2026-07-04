@@ -16,7 +16,10 @@ app.get('/api/restrictions', async (req, res) => {
     try {
         console.log(`Fetching fresh data from GitHub CDN...`);
         
-        const response = await axios.get(RAW_JSON_URL, {
+        // Append a unique timestamp to the URL to completely force GitHub to ignore its cache
+        const cacheBusterUrl = `${RAW_JSON_URL}?t=${Date.now()}`;
+        
+        const response = await axios.get(cacheBusterUrl, {
             headers: {
                 'Cache-Control': 'no-cache',
                 'Pragma': 'no-cache',
