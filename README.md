@@ -6,6 +6,8 @@ The project scrapes data daily from the [Nova Scotia BurnSafe map](https://novas
 
 > [!IMPORTANT]
 > **Scraping Disclaimer**: This project is configured to query the official government website on a controlled, daily schedule via GitHub Actions. Please do not modify the code to run scraping processes on every API request. Over-scraping public government resources is unnecessary, wastes public bandwidth, and risks getting your server's IP address blacklisted. The existing workflow handles scraping requirements safely and efficiently.
+> 
+> *Note: If the scrape stops working due to a change in the structure of the government's site or how they serve their webpage, please open an issue or contact me so I can update the source code.*
 
 ---
 
