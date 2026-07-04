@@ -44,7 +44,7 @@ async function runTests() {
         if (apiDataString === localDataString) {
             console.log('✅ Success: API response matches local data.json!');
         } else {
-            console.log('⚠️ Notice: API response does not match local data.json exactly (remote might be newer/older than local).');
+            throw new Error('API response does not match local data.json!');
         }
 
         // Validate basic structure
