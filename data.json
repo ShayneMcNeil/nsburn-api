@@ -1,0 +1,95 @@
+{
+  "dateTimeScraped": "2026-07-04T02:00:01.344Z",
+  "data": [
+    {
+      "county": "Annapolis County",
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+    },
+    {
+      "county": "Antigonish County",
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+    },
+    {
+      "county": "Cape Breton County",
+      "color-status": "Green",
+      "restriction-level": "Burning is allowed between 2:00 pm and 8:00 am"
+    },
+    {
+      "county": "Colchester County",
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+    },
+    {
+      "county": "Cumberland County",
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+    },
+    {
+      "county": "Digby County",
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+    },
+    {
+      "county": "Guysborough County",
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+    },
+    {
+      "county": "Halifax County",
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+    },
+    {
+      "county": "Hants County",
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+    },
+    {
+      "county": "Inverness County",
+      "color-status": "Green",
+      "restriction-level": "Burning is allowed between 2:00 pm and 8:00 am"
+    },
+    {
+      "county": "Kings County",
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+    },
+    {
+      "county": "Lunenburg County",
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+    },
+    {
+      "county": "Pictou County",
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+    },
+    {
+      "county": "Queens County",
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+    },
+    {
+      "county": "Richmond County",
+      "color-status": "Green",
+      "restriction-level": "Burning is allowed between 2:00 pm and 8:00 am"
+    },
+    {
+      "county": "Shelburne County",
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+    },
+    {
+      "county": "Victoria County",
+      "color-status": "Green",
+      "restriction-level": "Burning is allowed between 2:00 pm and 8:00 am"
+    },
+    {
+      "county": "Yarmouth County",
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+    }
+  ]
+}
