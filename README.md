@@ -36,7 +36,11 @@ graph TD
 Returns a responsive dashboard showing the operational state, the last scraped date/time, and basic information on how the API works, including a link to the GitHub repository.
 
 ### `GET /api/restrictions`
-Fetches the current burn restrictions for all counties in Nova Scotia.
+Fetches the current cached burn restrictions for all counties in Nova Scotia (updated daily).
+
+### `GET /api/restrictions/latest`
+Triggers an on-demand, live scrape of the government website outside the daily scheduled run and returns the fresh data immediately.
+* **Rate Limiting**: To prevent abuse and protect the government website, this endpoint is rate-limited to **2 requests per hour per user (IP)**. If the limit is exceeded, it returns a `429 Too Many Requests` status code.
 
 **Example Response:**
 ```json
@@ -77,6 +81,13 @@ Start the local Express server:
 node server.js
 ```
 The server will be running on `http://localhost:3000`. You can test it by going to `http://localhost:3000/` in your browser.
+
+### Database Setup (Optional)
+By default, the server uses a built-in **in-memory rate limiter** for `/api/restrictions/latest`. However, if you want rate limits to persist across server restarts and spin-downs (like on Render's Free tier), you can connect a PostgreSQL database (e.g. from Supabase or Render):
+
+1. Set the `DATABASE_URL` environment variable on your server (e.g., `postgres://user:password@host:port/dbname`).
+2. When the server starts, it will **automatically detect the database, create the `rate_limits` table, set up index lookups, and switch to database rate limiting**.
+3. If the database goes down or is not provided, the server automatically falls back to the in-memory rate limiter safely without crashing.
 
 ---
 

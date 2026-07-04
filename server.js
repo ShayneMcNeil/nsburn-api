@@ -1,5 +1,7 @@
 const express = require('express');
 const axios = require('axios');
+const { scrapeWebsite } = require('./scraper');
+const { Pool } = require('pg');
 const app = express();
 
 const PORT = process.env.PORT || 3000;
@@ -34,6 +36,111 @@ async function getLatestCommitSha() {
         return null;
     }
 }
+
+// Database connection setup
+let dbPool = null;
+
+if (process.env.DATABASE_URL) {
+    dbPool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+            rejectUnauthorized: false // Required for hosted databases like Render/Supabase
+        }
+    });
+
+    // Automatically create rate_limits table on startup if it doesn't exist
+    dbPool.query(`
+        CREATE TABLE IF NOT EXISTS rate_limits (
+            id SERIAL PRIMARY KEY,
+            ip VARCHAR(45) NOT NULL,
+            request_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE INDEX IF NOT EXISTS idx_rate_limits_ip_time ON rate_limits(ip, request_time);
+    `).then(() => {
+        console.log('Database initialized: rate_limits table and index verified.');
+    }).catch(err => {
+        console.error('Failed to initialize database table on startup:', err.message);
+    });
+} else {
+    console.log('DATABASE_URL not set. Running with local in-memory rate limiting.');
+}
+
+// Local in-memory fallback cache (used if DB is down or local development)
+const scrapeLimitCache = new Map();
+
+function fallbackInMemoryLimiter(req, res, next) {
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000;
+
+    if (!scrapeLimitCache.has(ip)) {
+        scrapeLimitCache.set(ip, []);
+    }
+
+    let timestamps = scrapeLimitCache.get(ip);
+    timestamps = timestamps.filter(t => now - t < oneHour);
+
+    if (timestamps.length >= 2) {
+        return res.status(429).json({
+            error: 'Too Many Requests',
+            message: 'You can only trigger a live scrape twice per hour. Please fetch /api/restrictions for cached data.'
+        });
+    }
+
+    timestamps.push(now);
+    scrapeLimitCache.set(ip, timestamps);
+    next();
+}
+
+// Main rate limiter middleware: 2 requests per hour per IP (checks DB, falls back to memory)
+async function rateLimiter(req, res, next) {
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+    if (dbPool) {
+        try {
+            // 1. Prune old records to prevent DB bloating (older than 1 hour)
+            await dbPool.query("DELETE FROM rate_limits WHERE request_time < NOW() - INTERVAL '1 hour'");
+
+            // 2. Count requests from this IP in the last hour
+            const result = await dbPool.query(
+                "SELECT COUNT(*) FROM rate_limits WHERE ip = $1 AND request_time > NOW() - INTERVAL '1 hour'",
+                [ip]
+            );
+
+            const count = parseInt(result.rows[0].count, 10);
+
+            if (count >= 2) {
+                return res.status(429).json({
+                    error: 'Too Many Requests',
+                    message: 'You can only trigger a live scrape twice per hour. Please fetch /api/restrictions for cached data.'
+                });
+            }
+
+            // 3. Record the current request
+            await dbPool.query("INSERT INTO rate_limits (ip) VALUES ($1)", [ip]);
+            next();
+        } catch (error) {
+            console.error('Database query failed in rateLimiter, falling back to memory:', error.message);
+            fallbackInMemoryLimiter(req, res, next);
+        }
+    } else {
+        fallbackInMemoryLimiter(req, res, next);
+    }
+}
+
+app.get('/api/restrictions/latest', rateLimiter, async (req, res) => {
+    try {
+        console.log('Triggering a live scrape of the website...');
+        const freshData = await scrapeWebsite();
+        res.json(freshData);
+    } catch (error) {
+        console.error('Failed to trigger live scrape:', error.message);
+        res.status(500).json({
+            error: 'Failed to perform live scrape.',
+            details: error.message
+        });
+    }
+});
 
 app.get('/api/restrictions', async (req, res) => {
     try {
@@ -238,8 +345,12 @@ app.get('/', async (req, res) => {
         
         <div class="info-card">
             <div class="info-item">
-                <div class="label">Endpoint</div>
+                <div class="label">Cached Endpoint</div>
                 <div class="value"><a href="/api/restrictions">/api/restrictions</a></div>
+            </div>
+            <div class="info-item">
+                <div class="label">Live Scrape Endpoint</div>
+                <div class="value"><a href="/api/restrictions/latest">/api/restrictions/latest</a></div>
             </div>
             <div class="info-item">
                 <div class="label">Last Scraped/Updated</div>
@@ -248,7 +359,7 @@ app.get('/', async (req, res) => {
             <div class="info-item">
                 <div class="label">How it works</div>
                 <div class="value" style="font-size: 0.95rem; line-height: 1.5; color: #cbd5e1;">
-                    This proxy dynamically retrieves the latest burn restriction data scraped daily from the Nova Scotia government website and cached securely on GitHub.
+                    This proxy dynamically retrieves the latest burn restriction data scraped daily from the Nova Scotia government website. You can also trigger an on-demand scrape outside the daily schedule by calling the <code>/api/restrictions/latest</code> endpoint (limited to 2 requests per hour per user).
                 </div>
             </div>
         </div>

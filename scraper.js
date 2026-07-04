@@ -45,10 +45,15 @@ async function scrapeWebsite() {
         fs.writeFileSync('data.json', JSON.stringify(scrapeReport, null, 2));
 
         console.log("Scrape successful!");
+        return scrapeReport;
     } catch(error) {
         console.log("Scrape failed: " + error.message);
-        process.exit(1);
+        throw error; // Throw error to caller when required, don't exit process directly unless run as script
     }
 };
 
-scrapeWebsite();
+if (require.main === module) {
+    scrapeWebsite().catch(() => process.exit(1));
+}
+
+module.exports = { scrapeWebsite };
