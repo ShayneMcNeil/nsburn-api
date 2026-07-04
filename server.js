@@ -1,17 +1,45 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
+const axios = require('axios');
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 
-app.get('/api/restrictions', (req, res) => {
-  try {
-    const dataPath = path.join(__dirname, 'data.json');
-    const rawData = fs.readFileSync(dataPath, 'utf8');
-    res.json(JSON.parse(rawData));
-  } catch (error) {
-    res.status(500).json({ error: 'Could not read data file' });
-  }
+const GITHUB_USERNAME = "shaynemcneil"; 
+const REPO_NAME = "nsburn-api";
+const BRANCH = "main";
+
+const RAW_JSON_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${BRANCH}/data.json`;
+
+app.use(express.json());
+
+app.get('/api/data', async (req, res) => {
+    try {
+        console.log(`Fetching fresh data from GitHub CDN...`);
+        
+        const response = await axios.get(RAW_JSON_URL, {
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            }
+        });
+
+        res.json(response.data);
+
+    } catch (error) {
+        console.error('Error fetching live data from GitHub:', error.message);
+        
+        res.status(500).json({ 
+            error: 'Failed to retrieve live data from storage.',
+            details: error.message 
+        });
+    }
 });
 
-app.listen(PORT, () => console.log(`API running on port ${PORT}`));
+app.get('/', (req, res) => {
+    res.send('BurnSafe NS API Proxy is running up-to-date!');
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running smoothly on port ${PORT}`);
+});
