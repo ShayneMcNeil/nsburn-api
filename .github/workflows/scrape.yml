@@ -1,0 +1,51 @@
+name: Daily Scraper (March 15 - Oct 15)
+
+on:
+  schedule:
+    # Runs at 17:15 UTC (2:15 PM ADT) every day from March to October
+    - cron: '15 17 * 3-10 *'
+  workflow_dispatch: # Allows manual testing
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # Protect the date boundaries (March 15 to October 15)
+      - name: Check if current date is within range
+        run: |
+          MONTH=$(date +%m)
+          DAY=$(date +%d)
+          
+          # If it's March and before the 15th, cancel the run safely
+          if [ "$MONTH" -eq 3 ] && [ "$DAY" -lt 15 ]; then
+            echo "Today is before March 15th. Skipping scrape."
+            exit 0
+          fi
+          
+          # If it's October and after the 15th, cancel the run safely
+          if [ "$MONTH" -eq 10 ] && [ "$DAY" -gt 15 ]; then
+            echo "Today is after October 15th. Skipping scrape."
+            exit 0
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install axios cheerio
+
+      - name: Run Scraper
+        run: node scraper.js
+
+      - name: Commit and Push if data changed
+        run: |
+          git config --global user.name "GitHub Action Scraper"
+          git config --global user.email "actions@github.com"
+          git add data.json
+          git diff-index --quiet HEAD || git commit -m "Automated data update"
+          git push
