@@ -32,8 +32,8 @@ jobs:
 
       - name: Wait for Render Deployment
         run: |
-          echo "Waiting 2.5 minutes for Render to finish deploying the new server code..."
-          sleep 150
+          echo "Waiting 1 minute for Render to finish deploying the new server code..."
+          sleep 60
 
       - name: Trigger Scraper Workflow and Wait
         env:

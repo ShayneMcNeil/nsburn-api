@@ -115,7 +115,7 @@ You can pass a `RENDER_URL` environment variable to test the live deployed API:
 
 ### CI/CD Workflow
 The project runs a GitHub Actions workflow (`CI Test Suite` inside [.github/workflows/test.yml](.github/workflows/test.yml)) on every push to `main` (excluding data-only updates). This CI/CD suite automatically:
-1. Waits for 2.5 minutes to allow the Render server to finish deploying the new server code.
+1. Waits for 1 minute to allow the Render server to finish deploying the new server code.
 2. Triggers a new scrape run by invoking the `scrape.yml` workflow via GitHub CLI and watches it until it completes successfully.
 3. Pulls down the newly committed `data.json` from the repository.
 4. Executes the integration tests using the `RENDER_URL` secret/variable to call `/api/restrictions` on the deployed Render instance, asserting that the served API response matches the freshly committed `data.json` exactly.
