@@ -1,0 +1,26 @@
+{
+  "name": "nsburn-api",
+  "version": "1.0.0",
+  "description": "Simple API that provides information about Nova Scotia burn restrictions",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShayneMcNeil/nsburn-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ShayneMcNeil/nsburn-api/issues"
+  },
+  "homepage": "https://github.com/ShayneMcNeil/nsburn-api#readme",
+  "dependencies": {
+    "axios": "^1.18.1",
+    "cheerio": "^1.2.0",
+    "express": "^5.2.1"
+  }
+}
