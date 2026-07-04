@@ -19,14 +19,36 @@ app.use((req, res, next) => {
     next();
 });
 
+// Helper function to get the latest commit SHA for the branch to bypass CDN caching
+async function getLatestCommitSha() {
+    try {
+        const refsUrl = `https://github.com/${GITHUB_USERNAME}/${REPO_NAME}/info/refs?service=git-upload-pack`;
+        const response = await axios.get(refsUrl, { timeout: 5000 });
+        const match = response.data.match(new RegExp(`([0-9a-f]{40})\\s+refs/heads/${BRANCH}`));
+        if (match) {
+            return match[1];
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching git refs:', error.message);
+        return null;
+    }
+}
+
 app.get('/api/restrictions', async (req, res) => {
     try {
-        console.log(`Fetching fresh data from GitHub CDN...`);
+        console.log(`Fetching fresh data from GitHub...`);
         
-        // Append a unique timestamp to the URL to completely force GitHub to ignore its cache
-        const cacheBusterUrl = `${RAW_JSON_URL}?t=${Date.now()}`;
+        const commitSha = await getLatestCommitSha();
         
-        const response = await axios.get(cacheBusterUrl, {
+        // If we successfully fetched the latest commit SHA, use it to bust the CDN cache
+        const targetUrl = commitSha 
+            ? `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${commitSha}/data.json`
+            : RAW_JSON_URL;
+        
+        console.log(`Target URL: ${targetUrl}`);
+
+        const response = await axios.get(targetUrl, {
             headers: {
                 'Cache-Control': 'no-cache',
                 'Pragma': 'no-cache',
