@@ -12,7 +12,7 @@ const RAW_JSON_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REP
 
 app.use(express.json());
 
-app.get('/api/data', async (req, res) => {
+app.get('/api/restrictions', async (req, res) => {
     try {
         console.log(`Fetching fresh data from GitHub CDN...`);
         
