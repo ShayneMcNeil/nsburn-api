@@ -41,6 +41,7 @@ Fetches the current cached burn restrictions for all counties in Nova Scotia (up
 ### `GET /api/restrictions/latest`
 Triggers an on-demand, live scrape of the government website outside the daily scheduled run and returns the fresh data immediately.
 * **Rate Limiting**: To prevent abuse and protect the government website, this endpoint is rate-limited to **2 requests per hour per user (IP)**. If the limit is exceeded, it returns a `429 Too Many Requests` status code.
+* **Server-Side Cache**: To protect the government's server from excessive load, the server caches the scraped data in memory for **30 minutes**. If another request comes in within 30 minutes of a successful scrape, they will receive the cached result instantly without hitting the government's website.
 
 **Example Response:**
 ```json
@@ -98,6 +99,13 @@ If you are hosting your own database and want to view the logged rate limits:
 2. Copy the **External Connection String** from your database provider (Render, Supabase, etc.).
 3. Open TablePlus, click **Create a new connection**, select **Import from URL**, paste the connection string, and connect.
 4. Click on the `rate_limits` table. You will see a list of IP addresses and timestamps representing active rate-limit buckets from the last hour.
+
+#### Deployed Server Limits (Render Free Tier)
+If you host this API on Render's Free Tier:
+* **750 Free Hours**: Render gives free accounts 750 free instance hours per month, shared across all free services. A single web service running 24/7 uses ~744 hours, fitting completely inside this limit.
+* **Inactivity Spin-down**: Free services spin down (go to sleep) after 15 minutes of inactivity. When asleep, it uses 0 instance hours. A request wakes it up, taking ~50 seconds.
+* **Keeping it awake**: You can keep the server awake 24/7 (avoiding the 50-second wake-up lag) by setting up an external pinging service (like cron-job.org) to ping your server's root URL `/` every 14 minutes.
+* **Important**: If you run *multiple* free web services on the same Render account and keep them all awake 24/7, they will quickly consume the 750-hour limit and get suspended. Keep only one service permanently awake.
 
 ---
 

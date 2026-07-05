@@ -136,10 +136,28 @@ async function rateLimiter(req, res, next) {
     }
 }
 
+// 30-minute memory cache variables to protect the government website from redundant scrapes
+let lastLiveScrapeTime = 0;
+let lastLiveScrapeData = null;
+
 app.get('/api/restrictions/latest', rateLimiter, async (req, res) => {
+    const now = Date.now();
+    const thirtyMinutes = 30 * 60 * 1000;
+
+    // Serve from cache if the last scrape was less than 30 minutes ago
+    if (lastLiveScrapeData && (now - lastLiveScrapeTime < thirtyMinutes)) {
+        console.log('[Cache] Serving live scrape data from 30-minute memory cache.');
+        return res.json(lastLiveScrapeData);
+    }
+
     try {
         console.log('Triggering a live scrape of the website...');
         const freshData = await scrapeWebsite();
+        
+        // Update cache state
+        lastLiveScrapeTime = now;
+        lastLiveScrapeData = freshData;
+        
         res.json(freshData);
     } catch (error) {
         console.error('Failed to trigger live scrape:', error.message);
