@@ -89,6 +89,16 @@ By default, the server uses a built-in **in-memory rate limiter** for `/api/rest
 2. When the server starts, it will **automatically detect the database, create the `rate_limits` table, set up index lookups, and switch to database rate limiting**.
 3. If the database goes down or is not provided, the server automatically falls back to the in-memory rate limiter safely without crashing.
 
+#### Database Pruning Logic
+To keep database storage at virtually zero and prevent database bloating, the server automatically **deletes all request records older than 1 hour** every time a new live scrape request is received. Therefore, the database table will only contain logs of requests made in the last 60 minutes.
+
+#### How to Inspect Records Visually (TablePlus)
+If you are hosting your own database and want to view the logged rate limits:
+1. Download and install [TablePlus](https://tableplus.com/).
+2. Copy the **External Connection String** from your database provider (Render, Supabase, etc.).
+3. Open TablePlus, click **Create a new connection**, select **Import from URL**, paste the connection string, and connect.
+4. Click on the `rate_limits` table. You will see a list of IP addresses and timestamps representing active rate-limit buckets from the last hour.
+
 ---
 
 ## CLI Tool
