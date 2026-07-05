@@ -4,6 +4,9 @@ const { scrapeWebsite } = require('./scraper');
 const { Pool } = require('pg');
 const app = express();
 
+// Trust reverse proxy headers (e.g. Render's load balancer) to get real user IPs
+app.set('trust proxy', true);
+
 const PORT = process.env.PORT || 3000;
 
 const GITHUB_USERNAME = "ShayneMcNeil"; 
