@@ -22,7 +22,7 @@ graph TD
     F[User / Client] -->|GET /api/restrictions| D
 ```
 
-1. **Daily Scrape**: An external scheduler (e.g., cron-job.org) triggers the GitHub Actions workflow twice every day (from March 15 to October 15) at **9:15 AM Atlantic Time** and **2:15 PM Atlantic Time** to execute [scraper.js](scraper.js). This schedule runs slightly after the government's updates to allow for any publishing delays on their end. It parses the Nova Scotia BurnSafe table and updates [data.json](data.json) in this repository.
+1. **Daily Scrape**: An external scheduler (e.g., cron-job.org) triggers the GitHub Actions workflow twice every day (from March 15 to October 15) at **8:15 AM Atlantic Time** and **2:15 PM Atlantic Time** to execute [scraper.js](scraper.js). This schedule runs slightly after the government's updates to allow for any publishing delays on their end. It parses the Nova Scotia BurnSafe table and updates [data.json](data.json) in this repository.
 2. **Dynamic Serving**: The API is hosted on Render ([server.js](server.js)). When someone calls the API, the server:
    - Resolves the latest commit SHA from GitHub.
    - Fetches the file contents dynamically using the unique commit SHA URL to bypass GitHub's aggressive 5-minute CDN caching.
@@ -45,7 +45,7 @@ Triggers an on-demand, live scrape of the government website outside the daily s
 **Example Response:**
 ```json
 {
-  "dateTimeScraped": "2026-07-04T02:53:34.347Z",
+  "dateTimeScrapedUTC": "2026-07-04T02:53:34.347Z",
   "data": [
     {
       "county": "Annapolis County",

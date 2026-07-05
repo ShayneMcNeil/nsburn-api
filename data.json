@@ -1,5 +1,5 @@
 {
-  "dateTimeScraped": "2026-07-04T18:28:04.105Z",
+  "dateTimeScrapedUTC": "2026-07-05T21:26:19.208Z",
   "data": [
     {
       "county": "Annapolis",
@@ -48,8 +48,8 @@
     },
     {
       "county": "Inverness",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Green",
+      "restriction-level": "Burning is allowed between 2:00 pm and 8:00 am"
     },
     {
       "county": "Kings",
@@ -83,8 +83,8 @@
     },
     {
       "county": "Victoria",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Green",
+      "restriction-level": "Burning is allowed between 2:00 pm and 8:00 am"
     },
     {
       "county": "Yarmouth",

@@ -73,6 +73,8 @@ function fallbackInMemoryLimiter(req, res, next) {
     const now = Date.now();
     const oneHour = 60 * 60 * 1000;
 
+    console.log(`[Audit] IP ${ip} requested a live scrape (in-memory mode) at ${new Date().toISOString()}`);
+
     if (!scrapeLimitCache.has(ip)) {
         scrapeLimitCache.set(ip, []);
     }
@@ -81,6 +83,7 @@ function fallbackInMemoryLimiter(req, res, next) {
     timestamps = timestamps.filter(t => now - t < oneHour);
 
     if (timestamps.length >= 2) {
+        console.log(`[Audit] IP ${ip} was BLOCKED (in-memory limit reached)`);
         return res.status(429).json({
             error: 'Too Many Requests',
             message: 'You can only trigger a live scrape twice per hour. Please fetch /api/restrictions for cached data.'
@@ -97,6 +100,7 @@ async function rateLimiter(req, res, next) {
     const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
     if (dbPool) {
+        console.log(`[Audit] IP ${ip} requested a live scrape (database mode) at ${new Date().toISOString()}`);
         try {
             // 1. Prune old records to prevent DB bloating (older than 1 hour)
             await dbPool.query("DELETE FROM rate_limits WHERE request_time < NOW() - INTERVAL '1 hour'");
@@ -110,6 +114,7 @@ async function rateLimiter(req, res, next) {
             const count = parseInt(result.rows[0].count, 10);
 
             if (count >= 2) {
+                console.log(`[Audit] IP ${ip} was BLOCKED (database limit reached)`);
                 return res.status(429).json({
                     error: 'Too Many Requests',
                     message: 'You can only trigger a live scrape twice per hour. Please fetch /api/restrictions for cached data.'
@@ -183,8 +188,8 @@ app.get('/', async (req, res) => {
             ? `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/${commitSha}/data.json`
             : RAW_JSON_URL;
         const response = await axios.get(targetUrl);
-        if (response.data && response.data.dateTimeScraped) {
-            lastUpdated = new Date(response.data.dateTimeScraped).toLocaleString('en-US', {
+        if (response.data && response.data.dateTimeScrapedUTC) {
+            lastUpdated = new Date(response.data.dateTimeScrapedUTC).toLocaleString('en-US', {
                 timeZoneName: 'short'
             });
         }

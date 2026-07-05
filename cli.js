@@ -8,10 +8,10 @@ console.log(`Fetching burn restrictions from: ${targetUrl}...\n`);
 
 axios.get(targetUrl)
     .then(response => {
-        const { dateTimeScraped, data } = response.data;
+        const { dateTimeScrapedUTC, data } = response.data;
 
-        if (dateTimeScraped) {
-            const date = new Date(dateTimeScraped);
+        if (dateTimeScrapedUTC) {
+            const date = new Date(dateTimeScrapedUTC);
             console.log(`Last Checked/Updated: ${date.toLocaleString()} local time`);
             console.log('='.repeat(60));
         }

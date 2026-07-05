@@ -38,7 +38,7 @@ async function scrapeWebsite() {
         let scrapeDate = new Date();
 
         const scrapeReport = {
-            "dateTimeScraped": scrapeDate,
+            "dateTimeScrapedUTC": scrapeDate,
             "data": restrictions
         }
 
