@@ -14,12 +14,31 @@ The project scrapes data daily from the [Nova Scotia BurnSafe map](https://novas
 ## How It Works
 
 ```mermaid
-graph TD
-    A[NS BurnSafe Website] -->|Scraped daily| B[GitHub Actions]
-    B -->|Commits fresh data| C[(GitHub repo: data.json)]
-    D[Render Server] -->|Fetches latest Commit SHA| E[GitHub info/refs]
-    D -->|Requests JSON via Commit SHA| C
-    F[User / Client] -->|GET /api/restrictions| D
+flowchart TD
+    subgraph Scraping_Pipeline ["Scraping Pipeline (Scheduled)"]
+        Cron["cron-job.org (Scheduler)"] -->|POST Webhook| GHA["GitHub Actions Runner"]
+        GHA -->|Runs scraper.js| Gov["NS BurnSafe Website"]
+        GHA -->|Commits data| Repo["GitHub Repo (data.json)"]
+    end
+
+    subgraph Render_API ["Render API Server"]
+        Render["Render Server (server.js)"]
+        DB[("PostgreSQL DB (Rate Limits)")]
+        Cache[("30-Min Memory Cache")]
+        
+        Render -->|Prunes & Validates| DB
+        Render -->|Reads / Updates| Cache
+    end
+
+    subgraph Request_Flow ["Request Flow"]
+        Client["User / Client"]
+        
+        Client -->|GET /api/restrictions?county=...| Render
+        Render -->|Fetches latest data| Repo
+        
+        Client -->|GET /api/restrictions/latest?county=...| Render
+        Render -->|If cache expired: Scrape| Gov
+    end
 ```
 
 1. **Daily Scrape**: An external scheduler (e.g., cron-job.org) triggers the GitHub Actions workflow twice every day (from March 15 to October 15) at **8:15 AM Atlantic Time** and **2:15 PM Atlantic Time** to execute [scraper.js](scraper.js). This schedule runs slightly after the government's updates to allow for any publishing delays on their end. It parses the Nova Scotia BurnSafe table and updates [data.json](data.json) in this repository.
@@ -37,9 +56,13 @@ Returns a responsive dashboard showing the operational state, the last scraped d
 
 ### `GET /api/restrictions`
 Fetches the current cached burn restrictions for all counties in Nova Scotia (updated daily).
+* **Query Parameters**:
+  - `county` (optional): Filter results to a specific county (case-insensitive, partial matching allowed, e.g., `/api/restrictions?county=annapolis`).
 
 ### `GET /api/restrictions/latest`
 Triggers an on-demand, live scrape of the government website outside the daily scheduled run and returns the fresh data immediately.
+* **Query Parameters**:
+  - `county` (optional): Filter results to a specific county (case-insensitive, partial matching allowed, e.g., `/api/restrictions/latest?county=annapolis`).
 * **Rate Limiting**: To prevent abuse and protect the government website, this endpoint is rate-limited to **2 requests per hour per user (IP)**. If the limit is exceeded, it returns a `429 Too Many Requests` status code.
 * **Server-Side Cache**: To protect the government's server from excessive load, the server caches the scraped data in memory for **30 minutes**. If another request comes in within 30 minutes of a successful scrape, they will receive the cached result instantly without hitting the government's website.
 
@@ -153,3 +176,18 @@ The project runs a GitHub Actions workflow (`CI Test Suite` inside [.github/work
 2. Triggers a new scrape run by invoking the `scrape.yml` workflow via GitHub CLI and watches it until it completes successfully.
 3. Pulls down the newly committed `data.json` from the repository.
 4. Executes the integration tests using the `RENDER_URL` secret/variable to call `/api/restrictions` on the deployed Render instance, asserting that the served API response matches the freshly committed `data.json` exactly.
+
+---
+
+## Supporting Firefighters & Wildfire Prevention in Nova Scotia
+
+Nova Scotia's volunteer and professional firefighters work tirelessly to protect our communities, forests, and wildlife. You can support their efforts and stay informed on fire safety using the resources below:
+
+### Support Local Firefighters
+* **Nova Scotia Firefighters 50/50 Raffle**: Support volunteer fire departments across the province by participating in the weekly 50/50 draw. Ticket sales help fund essential fire-rescue equipment and community programs. Learn more and buy tickets at [Rafflebox - NS Firefighters 50/50](https://www.rafflebox.ca/raffle/nsfd/).
+
+### Fire Safety & Reporting
+* **To Report a Fire**: If you spot a wildfire, call **911** immediately.
+* **Burn Restrictions Map & Regulations**: Check the official [Nova Scotia BurnSafe Map](https://novascotia.ca/burnsafe/) before doing any outdoor burning. Remember, burning is only permitted when restrictions are "Green" (all day) or "Yellow" (7 PM to 8 AM).
+* **Wildfire Prevention & Safety Rules**: Learn how to burn safely and prevent wildfires at the [Government of Nova Scotia - Wildfire Prevention Guide](https://novascotia.ca/natr/forestprotect/wildfire/prevention.asp).
+* **Emergency Alerts**: Stay updated during active fires and evacuations by checking [Nova Scotia Emergency Management Office (EMO)](https://novascotia.ca/alert/news/).

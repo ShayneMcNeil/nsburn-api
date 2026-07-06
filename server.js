@@ -136,6 +136,22 @@ async function rateLimiter(req, res, next) {
     }
 }
 
+// Helper to filter scrape report by county name case-insensitively
+function filterByCounty(jsonData, countyQuery) {
+    if (!countyQuery) return jsonData;
+
+    // Shallow copy the object to avoid mutating cached data
+    const result = { ...jsonData };
+
+    if (Array.isArray(jsonData.data)) {
+        result.data = jsonData.data.filter(item =>
+            item.county && item.county.toLowerCase().includes(countyQuery.toLowerCase())
+        );
+    }
+
+    return result;
+}
+
 // 30-minute memory cache variables to protect the government website from redundant scrapes
 let lastLiveScrapeTime = 0;
 let lastLiveScrapeData = null;
@@ -147,7 +163,7 @@ app.get('/api/restrictions/latest', rateLimiter, async (req, res) => {
     // Serve from cache if the last scrape was less than 30 minutes ago
     if (lastLiveScrapeData && (now - lastLiveScrapeTime < thirtyMinutes)) {
         console.log('[Cache] Serving live scrape data from 30-minute memory cache.');
-        return res.json(lastLiveScrapeData);
+        return res.json(filterByCounty(lastLiveScrapeData, req.query.county));
     }
 
     try {
@@ -158,7 +174,7 @@ app.get('/api/restrictions/latest', rateLimiter, async (req, res) => {
         lastLiveScrapeTime = now;
         lastLiveScrapeData = freshData;
         
-        res.json(freshData);
+        res.json(filterByCounty(freshData, req.query.county));
     } catch (error) {
         console.error('Failed to trigger live scrape:', error.message);
         res.status(500).json({
@@ -186,10 +202,11 @@ app.get('/api/restrictions', async (req, res) => {
                 'Cache-Control': 'no-cache',
                 'Pragma': 'no-cache',
                 'Expires': '0',
+                'User-Agent': 'nsburn-api-server'
             }
         });
 
-        res.json(response.data);
+        res.json(filterByCounty(response.data, req.query.county));
 
     } catch (error) {
         console.error('Error fetching live data from GitHub:', error.message);
