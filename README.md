@@ -23,7 +23,7 @@ flowchart TD
 
     subgraph Render_API ["Render API Server"]
         Render["Render Server (server.js)"]
-        DB[("PostgreSQL DB (Rate Limits)")]
+        DB[("Supabase DB (Rate Limits)")]
         Cache[("30-Min Memory Cache")]
         
         Render -->|Prunes & Validates| DB
@@ -107,28 +107,35 @@ node server.js
 The server will be running on `http://localhost:3000`. You can test it by going to `http://localhost:3000/` in your browser.
 
 ### Database Setup (Optional)
-By default, the server uses a built-in **in-memory rate limiter** for `/api/restrictions/latest`. However, if you want rate limits to persist across server restarts and spin-downs (like on Render's Free tier), you can connect a PostgreSQL database (e.g. from Supabase or Render):
+By default, the server uses a built-in **in-memory rate limiter** for `/api/restrictions/latest`. However, to persist rate limits across server restarts and spin-downs (like on Render's Free tier), it is recommended to connect a **Supabase PostgreSQL database** (which is free and does not expire after 30 days like Render's databases do):
 
-1. Set the `DATABASE_URL` environment variable on your server (e.g., `postgres://user:password@host:port/dbname`).
-2. When the server starts, it will **automatically detect the database, create the `rate_limits` table, set up index lookups, and switch to database rate limiting**.
-3. If the database goes down or is not provided, the server automatically falls back to the in-memory rate limiter safely without crashing.
+1. Create a free project on [Supabase](https://supabase.com/).
+2. Copy the **Transaction Pooler Connection URI** (port `6543`) from your Supabase database settings (or by clicking the green **Connect** button at the top header).
+3. Set the `DATABASE_URL` environment variable on your Render Web Service to your Supabase connection URI (make sure to replace the `[YOUR-PASSWORD]` placeholder with your database password).
+4. When the server starts, it will **automatically detect the database, create the `rate_limits` table, set up index lookups, and switch to database rate limiting**.
+5. If the database goes down or is not provided, the server automatically falls back to the in-memory rate limiter safely without crashing.
 
 #### Database Pruning Logic
 To keep database storage at virtually zero and prevent database bloating, the server automatically **deletes all request records older than 1 hour** every time a new live scrape request is received. Therefore, the database table will only contain logs of requests made in the last 60 minutes.
 
-#### How to Inspect Records Visually (TablePlus)
-If you are hosting your own database and want to view the logged rate limits:
-1. Download and install [TablePlus](https://tableplus.com/).
-2. Copy the **External Connection String** from your database provider (Render, Supabase, etc.).
-3. Open TablePlus, click **Create a new connection**, select **Import from URL**, paste the connection string, and connect.
-4. Click on the `rate_limits` table. You will see a list of IP addresses and timestamps representing active rate-limit buckets from the last hour.
+#### IP Sanitization & Truncation
+When requests traverse proxies (like Cloudflare or Render's routing), the server receives a comma-separated list of IP addresses in the `X-Forwarded-For` header. The server automatically sanitizes this list by:
+* Extracting **only the first IP** (the client's true IP).
+* Truncating the string to **45 characters max** to prevent PostgreSQL from throwing a "string data, right truncation" database crash.
 
-#### Deployed Server Limits (Render Free Tier)
-If you host this API on Render's Free Tier:
+#### How to Inspect Records Visually (TablePlus)
+If you want to inspect your rate-limit records:
+1. Download and install [TablePlus](https://tableplus.com/).
+2. Copy the **External Connection String** from your database provider.
+3. Open TablePlus, click **Create a new connection**, select **Import from URL**, paste the connection string, and connect.
+4. Click on the `rate_limits` table to view the active IP logs from the last hour.
+
+#### Deployed Server Limits (Render & Supabase Free Tiers)
+If you host this API on Render's and Supabase's Free Tiers:
 * **750 Free Hours**: Render gives free accounts 750 free instance hours per month, shared across all free services. A single web service running 24/7 uses ~744 hours, fitting completely inside this limit.
-* **Inactivity Spin-down**: Free services spin down (go to sleep) after 15 minutes of inactivity. When asleep, it uses 0 instance hours. A request wakes it up, taking ~50 seconds.
-* **Keeping it awake**: You can keep the server awake 24/7 (avoiding the 50-second wake-up lag) by setting up an external pinging service (like cron-job.org) to ping your server's root URL `/` every 14 minutes.
-* **Important**: If you run *multiple* free web services on the same Render account and keep them all awake 24/7, they will quickly consume the 750-hour limit and get suspended. Keep only one service permanently awake.
+* **Inactivity Spin-down**: Render's free services sleep after 15 minutes of inactivity. Supabase databases will pause if they receive zero queries for **7 days**.
+* **Keeping them awake**: You can keep the database awake forever by setting up an external pinging service (like cron-job.org) to ping your `/api/restrictions/latest` endpoint **once every 5 days**. This wakes up Render, makes a quick query on Supabase (resetting the 7-day timer), and consumes practically zero Render free hours.
+* **Gotcha: cron-job.org "Test Run" IP Forwarding**: When you manually click **Test Run** on cron-job.org, their server forwards your browser's public IP address in the `X-Forwarded-For` header. If your home IP is already rate-limited on your server, the Test Run will return a `429 Too Many Requests` error. The automated, scheduled runs do *not* forward your IP and will work normally.
 
 ---
 
