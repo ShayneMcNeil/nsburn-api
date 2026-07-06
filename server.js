@@ -68,11 +68,28 @@ if (process.env.DATABASE_URL) {
     console.log('DATABASE_URL not set. Running with local in-memory rate limiting.');
 }
 
+// Helper to resolve, clean, and truncate incoming client IP address
+function resolveClientIp(req) {
+    let ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+    // Extract first IP in the list if behind multiple proxies
+    if (ip && ip.includes(',')) {
+        ip = ip.split(',')[0].trim();
+    }
+
+    // Limit length to 45 characters to match DB VARCHAR(45) column limits
+    if (ip && ip.length > 45) {
+        ip = ip.substring(0, 45);
+    }
+
+    return ip;
+}
+
 // Local in-memory fallback cache (used if DB is down or local development)
 const scrapeLimitCache = new Map();
 
 function fallbackInMemoryLimiter(req, res, next) {
-    const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const ip = resolveClientIp(req);
     const now = Date.now();
     const oneHour = 60 * 60 * 1000;
 
@@ -100,7 +117,7 @@ function fallbackInMemoryLimiter(req, res, next) {
 
 // Main rate limiter middleware: 2 requests per hour per IP (checks DB, falls back to memory)
 async function rateLimiter(req, res, next) {
-    const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const ip = resolveClientIp(req);
 
     if (dbPool) {
         console.log(`[Audit] IP ${ip} requested a live scrape (database mode) at ${new Date().toISOString()}`);
