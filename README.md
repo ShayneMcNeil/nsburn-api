@@ -63,8 +63,8 @@ Fetches the current cached burn restrictions for all counties in Nova Scotia (up
 Triggers an on-demand, live scrape of the government website outside the daily scheduled run and returns the fresh data immediately.
 * **Query Parameters**:
   - `county` (optional): Filter results to a specific county (case-insensitive, partial matching allowed, e.g., `/api/restrictions/latest?county=annapolis`).
-* **Rate Limiting**: To prevent abuse and protect the government website, this endpoint is rate-limited to **2 requests per hour per user (IP)**. If the limit is exceeded, it returns a `429 Too Many Requests` status code.
-* **Server-Side Cache**: To protect the government's server from excessive load, the server caches the scraped data in memory for **30 minutes**. If another request comes in within 30 minutes of a successful scrape, they will receive the cached result instantly without hitting the government's website.
+* **Rate Limiting**: To prevent abuse and protect the government website, this endpoint is rate-limited to **2 requests per hour per user (IP)**. If the limit is exceeded, it returns a `429 Too Many Requests` status code. **Note: Requests served from the 30-minute memory cache are completely free and do not count against this quota.**
+* **Server-Side Cache**: To protect the government's server from excessive load, the server caches the scraped data in memory for **30 minutes**. If another request comes in within 30 minutes of a successful scrape, they will receive the cached result instantly without hitting the government's website (and without using a rate limit credit).
 
 **Example Response:**
 ```json
