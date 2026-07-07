@@ -88,39 +88,10 @@ function resolveClientIp(req) {
 // Local in-memory fallback cache (used if DB is down or local development)
 const scrapeLimitCache = new Map();
 
-function fallbackInMemoryLimiter(req, res, next) {
-    const ip = resolveClientIp(req);
-    const now = Date.now();
-    const oneHour = 60 * 60 * 1000;
-
-    console.log(`[Audit] IP ${ip} requested a live scrape (in-memory mode) at ${new Date().toISOString()}`);
-
-    if (!scrapeLimitCache.has(ip)) {
-        scrapeLimitCache.set(ip, []);
-    }
-
-    let timestamps = scrapeLimitCache.get(ip);
-    timestamps = timestamps.filter(t => now - t < oneHour);
-
-    if (timestamps.length >= 2) {
-        console.log(`[Audit] IP ${ip} was BLOCKED (in-memory limit reached)`);
-        return res.status(429).json({
-            error: 'Too Many Requests',
-            message: 'You can only trigger a live scrape twice per hour. Please fetch /api/restrictions for cached data.'
-        });
-    }
-
-    timestamps.push(now);
-    scrapeLimitCache.set(ip, timestamps);
-    next();
-}
-
-// Main rate limiter middleware: 2 requests per hour per IP (checks DB, falls back to memory)
-async function rateLimiter(req, res, next) {
-    const ip = resolveClientIp(req);
-
+// Checks and records rate limits. Returns true if allowed, false if blocked.
+async function checkAndRecordRateLimit(ip) {
     if (dbPool) {
-        console.log(`[Audit] IP ${ip} requested a live scrape (database mode) at ${new Date().toISOString()}`);
+        console.log(`[Audit] Checking database rate limit for IP: ${ip}`);
         try {
             // 1. Prune old records to prevent DB bloating (older than 1 hour)
             await dbPool.query("DELETE FROM rate_limits WHERE request_time < NOW() - INTERVAL '1 hour'");
@@ -135,22 +106,41 @@ async function rateLimiter(req, res, next) {
 
             if (count >= 2) {
                 console.log(`[Audit] IP ${ip} was BLOCKED (database limit reached)`);
-                return res.status(429).json({
-                    error: 'Too Many Requests',
-                    message: 'You can only trigger a live scrape twice per hour. Please fetch /api/restrictions for cached data.'
-                });
+                return false;
             }
 
             // 3. Record the current request
             await dbPool.query("INSERT INTO rate_limits (ip) VALUES ($1)", [ip]);
-            next();
+            return true;
         } catch (error) {
-            console.error('Database query failed in rateLimiter, falling back to memory:', error.message);
-            fallbackInMemoryLimiter(req, res, next);
+            console.error('Database query failed in checkAndRecordRateLimit, falling back to memory:', error.message);
+            return checkAndRecordInMemoryRateLimit(ip);
         }
     } else {
-        fallbackInMemoryLimiter(req, res, next);
+        return checkAndRecordInMemoryRateLimit(ip);
     }
+}
+
+function checkAndRecordInMemoryRateLimit(ip) {
+    console.log(`[Audit] Checking in-memory rate limit for IP: ${ip}`);
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000;
+
+    if (!scrapeLimitCache.has(ip)) {
+        scrapeLimitCache.set(ip, []);
+    }
+
+    let timestamps = scrapeLimitCache.get(ip);
+    timestamps = timestamps.filter(t => now - t < oneHour);
+
+    if (timestamps.length >= 2) {
+        console.log(`[Audit] IP ${ip} was BLOCKED (in-memory limit reached)`);
+        return false;
+    }
+
+    timestamps.push(now);
+    scrapeLimitCache.set(ip, timestamps);
+    return true;
 }
 
 // Helper to filter scrape report by county name case-insensitively
@@ -173,18 +163,30 @@ function filterByCounty(jsonData, countyQuery) {
 let lastLiveScrapeTime = 0;
 let lastLiveScrapeData = null;
 
-app.get('/api/restrictions/latest', rateLimiter, async (req, res) => {
+app.get('/api/restrictions/latest', async (req, res) => {
+    const ip = resolveClientIp(req);
     const now = Date.now();
     const thirtyMinutes = 30 * 60 * 1000;
 
-    // Serve from cache if the last scrape was less than 30 minutes ago
+    // 1. Serve from cache if the last scrape was less than 30 minutes ago (completely free/unlimited!)
     if (lastLiveScrapeData && (now - lastLiveScrapeTime < thirtyMinutes)) {
-        console.log('[Cache] Serving live scrape data from 30-minute memory cache.');
+        console.log(`[Cache] Serving live scrape data from 30-minute memory cache to IP: ${ip}`);
         return res.json(filterByCounty(lastLiveScrapeData, req.query.county));
     }
 
+    // 2. Cache is expired/missing. We must perform a live scrape.
+    // Check and record the rate limit first.
+    const isAllowed = await checkAndRecordRateLimit(ip);
+    if (!isAllowed) {
+        return res.status(429).json({
+            error: 'Too Many Requests',
+            message: 'You can only trigger a live scrape twice per hour. Please fetch /api/restrictions for cached data.'
+        });
+    }
+
+    // 3. Rate limit passed. Perform the scrape.
     try {
-        console.log('Triggering a live scrape of the website...');
+        console.log(`[Live Scrape] Triggering a live scrape of the website for IP: ${ip}...`);
         const freshData = await scrapeWebsite();
         
         // Update cache state
