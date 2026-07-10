@@ -1,5 +1,5 @@
 {
-  "dateTimeScrapedUTC": "2026-07-09T17:15:13.734Z",
+  "dateTimeScrapedUTC": "2026-07-10T11:15:11.840Z",
   "data": [
     {
       "county": "Annapolis",
@@ -8,48 +8,48 @@
     },
     {
       "county": "Antigonish",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Cape Breton",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Colchester",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Cumberland",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Digby",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Guysborough",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Halifax",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Hants",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Inverness",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Kings",
@@ -58,38 +58,38 @@
     },
     {
       "county": "Lunenburg",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Pictou",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Queens",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Richmond",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Shelburne",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Victoria",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     },
     {
       "county": "Yarmouth",
-      "color-status": "Yellow",
-      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
+      "color-status": "Red",
+      "restriction-level": "Burning is not allowed"
     }
   ]
 }
