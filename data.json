@@ -1,5 +1,5 @@
 {
-  "dateTimeScrapedUTC": "2026-07-18T11:15:14.937Z",
+  "dateTimeScrapedUTC": "2026-07-18T17:15:13.840Z",
   "data": [
     {
       "county": "Annapolis",
@@ -13,8 +13,8 @@
     },
     {
       "county": "Cape Breton",
-      "color-status": "Red",
-      "restriction-level": "Burning is not allowed"
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
     },
     {
       "county": "Colchester",
@@ -48,8 +48,8 @@
     },
     {
       "county": "Inverness",
-      "color-status": "Red",
-      "restriction-level": "Burning is not allowed"
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
     },
     {
       "county": "Kings",
@@ -73,8 +73,8 @@
     },
     {
       "county": "Richmond",
-      "color-status": "Red",
-      "restriction-level": "Burning is not allowed"
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
     },
     {
       "county": "Shelburne",
@@ -83,8 +83,8 @@
     },
     {
       "county": "Victoria",
-      "color-status": "Red",
-      "restriction-level": "Burning is not allowed"
+      "color-status": "Yellow",
+      "restriction-level": "Burning is only allowed between 7:00 pm and 8:00 am (burning is not allowed before 7:00 pm)"
     },
     {
       "county": "Yarmouth",
